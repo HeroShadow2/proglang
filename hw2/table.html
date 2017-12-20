@@ -1,0 +1,99 @@
+<html>
+
+<head>
+	<title>
+		Таблица
+	</title>
+	<script>
+		window.onload = function () {
+
+			var storage = new Map();
+
+			var table = document.getElementById('table');
+			var headerRow = document.createElement('tr');
+			var corner = document.createElement('td');
+			corner.textContent = '#';
+			headerRow.appendChild(corner);
+			var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			for (var i = 0; i < 26; ++i) {
+				var headerCell = document.createElement('td');
+				headerCell.classList.add('headerCell');
+				headerCell.textContent = letters.charAt(i);
+				headerRow.appendChild(headerCell);
+			}
+			table.appendChild(headerRow);
+			for (var i = 1; i <= 20; ++i) {
+				var row = document.createElement('tr');
+				var headerCell = document.createElement('td');
+				headerCell.classList.add('headerCell');
+				headerCell.textContent = i;
+				row.appendChild(headerCell);
+				for (var j = 0; j < 26; ++j) {
+					var cell = document.createElement('td');
+					cell.classList.add('cell');
+					// cell.textContent = String.fromCharCode('A'.charCodeAt(0) + j) + i;
+					cell.id = String.fromCharCode('A'.charCodeAt(0) + j) + i;
+					row.appendChild(cell);
+				}
+				table.appendChild(row);
+			}
+			document.querySelectorAll('.cell').forEach(function (cell) {
+				cell.onclick = function () {
+					var form = document.createElement('form');
+					var input = document.createElement('input');
+					input.value = storage.has(cell.id) ? storage.get(cell.id) : cell.textContent;
+					form.onsubmit = function () {
+						cell.removeChild(form);
+						storage.set(cell.id, input.value);
+						if (storage.get(cell.id)[0] == '=') {
+							cell.textContent = eval(storage.get(cell.id).substr(1));
+						} else {
+							cell.textContent = storage.get(cell.id);
+						}
+					};
+					form.appendChild(input);
+					cell.appendChild(form);
+					input.focus();
+				};
+			});
+			window.saveStorage = function () {
+				localStorage.setItem('storage', JSON.stringify([...storage]));
+				// console.log( JSON.stringify([...storage]));
+			};
+			window.loadStorage = function () {
+				storage = new Map(JSON.parse(localStorage.getItem('storage')));
+				// console.log(localStorage.getItem('storage'));
+				document.querySelectorAll('.cell').forEach(function (cell) {
+					if (storage.has(cell.id)){
+						if (storage.get(cell.id)[0] == '=') {
+							cell.textContent = eval(storage.get(cell.id).substr(1));
+						} else {
+							cell.textContent = storage.get(cell.id);
+						}
+					}
+				});
+			}
+
+		}
+	</script>
+	<style>
+		.headerCell {
+			background-color: #aaa;
+		}
+		#table {
+			border: 1px solid black;
+			min-width: 100%;
+		}
+		#table td {
+			border: 1px solid black;
+		}
+	</style>
+</head>
+
+<body>
+	<table id="table"></table>
+	<button onclick="saveStorage();">Save</button>
+	<button onclick="loadStorage();">Load</button>
+</body>
+
+</html>
